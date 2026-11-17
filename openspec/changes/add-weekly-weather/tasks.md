@@ -7,15 +7,15 @@
 
 ## 2. Domain and data
 
-- [ ] 2.1 Define forecast models, the location and repository interfaces, and the observe and refresh use cases.
-- [ ] 2.2 Implement the foreground location adapter, bounded fix lookup, forecast target construction, and Montréal fallback.
-- [ ] 2.3 Implement the Open-Meteo request and response validation, weather code mapping, and atomic DataStore snapshot replacement.
-- [ ] 2.4 Connect the application graph with Hilt and configure Android manifest permissions and snapshot backup exclusions.
+- [x] 2.1 Define forecast models, the location and repository interfaces, and the observe and refresh use cases.
+- [x] 2.2 Implement the foreground location adapter, bounded fix lookup, forecast target construction, and Montréal fallback.
+- [x] 2.3 Implement the Ktor Open-Meteo request and response validation, weather code mapping, and atomic DataStore snapshot replacement.
+- [x] 2.4 Connect the application graph with Hilt and configure Android manifest permissions and snapshot backup exclusions.
 
 ## 3. Forecast screen
 
-- [ ] 3.1 Replace the starter UI with seven-day forecast content, location label, last-updated date and time, and refresh and retry actions.
-- [ ] 3.2 Wire permission handling and ViewModel state for initial load, cached display, active refresh, nonblocking refresh failure, and empty-cache failure.
+- [x] 3.1 Replace the starter UI with seven-day forecast content, location label, last-updated date and time, and refresh and retry actions.
+- [x] 3.2 Wire permission handling and ViewModel state for initial load, cached display, active refresh, nonblocking refresh failure, and empty-cache failure.
 
 ## 4. Verification and documentation
 
