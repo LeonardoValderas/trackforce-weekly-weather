@@ -19,9 +19,9 @@
 
 ## 4. Verification and documentation
 
-- [ ] 4.1 Add at least three meaningful JVM tests using the use-case, repository, and ViewModel cases described in the design. Run `./gradlew test`.
-- [ ] 4.2 Set a nondefault emulator location and launch online. Grant location permission and verify seven entries, the device location label, and the last-updated time.
-- [ ] 4.3 Force-stop the app, disable emulator Wi-Fi and mobile data, and relaunch without clearing app data. Verify the same seven entries, location label, and timestamp.
-- [ ] 4.4 While offline with saved data visible, retry and verify the error appears alongside the unchanged forecast. Clear app data and relaunch offline to verify the unavailable state and retry action. Restore connectivity and verify recovery.
-- [ ] 4.5 With connectivity restored and permission reset, deny location access. Verify the labeled Montréal forecast. Grant permission in Settings and disable location services to check the unavailable-fix fallback independently.
-- [ ] 4.6 Document clean-clone run and test instructions with verified Android Studio, JDK, SDK, and Gradle prerequisites. Add emulator steps, architecture and cache behavior, fallback policy, Open-Meteo notes, the three pattern names and code locations with rationale, and potential follow-up work.
+- [x] 4.1 Add at least three meaningful JVM tests using the use-case, repository, and ViewModel cases described in the design. Run `./gradlew test`.
+- [x] 4.2 Set a nondefault emulator location and launch online. Grant location permission and verify seven entries, the device location label, and the last-updated time.
+- [x] 4.3 Force-stop the app, disable emulator Wi-Fi and mobile data, and relaunch without clearing app data. Verify the same seven entries, location label, and timestamp.
+- [x] 4.4 While offline with saved data visible, retry and verify the error appears alongside the unchanged forecast. Clear app data and relaunch offline to verify the unavailable state and retry action. Restore connectivity and verify recovery.
+- [x] 4.5 With connectivity restored and permission reset, deny location access. Verify the labeled Montréal forecast. Grant permission in Settings and disable location services to check the unavailable-fix fallback independently.
+- [x] 4.6 Document clean-clone run and test instructions with verified Android Studio, JDK, SDK, and Gradle prerequisites. Add emulator steps, architecture and cache behavior, fallback policy, Open-Meteo notes, the three pattern names and code locations with rationale, and potential follow-up work.
