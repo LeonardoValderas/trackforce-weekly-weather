@@ -14,16 +14,16 @@ The repository has a single Kotlin Android application module with a Compose sta
 
 ### Layering and design patterns
 
-Keep the existing `app` module and organize the feature by layer.
+Keep the existing `app` module and organize the feature by layer. The `ui` package contains `components`, `presentation`, `screen`, and `theme`. The app-level `di` package holds Hilt bindings.
 
 | Layer | Responsibility |
 | --- | --- |
 | UI | `MainActivity` hosts Compose. `WeeklyWeatherScreen` launches the permission contract, renders the screen state, and forwards refresh and retry actions. |
 | Presentation | `WeeklyWeatherViewModel` coordinates initial load and refresh in `viewModelScope`. It exposes immutable `StateFlow<WeeklyWeatherUiState>` collected with lifecycle awareness. |
-| Domain | `ObserveWeeklyForecast` and `RefreshWeeklyForecast` expose forecast operations through a `ForecastRepository` interface. Domain models contain the seven days, display location, forecast time zone, and successful fetch instant. |
-| Data | `DefaultForecastRepository` coordinates `OpenMeteoForecastDataSource` and `ForecastLocalDataSource`. `AndroidLocationAdapter` implements a domain location interface used by `RefreshWeeklyForecast`. |
+| Domain | `ObserveWeeklyForecastUseCase` and `RefreshWeeklyForecastUseCase` expose forecast operations through a `ForecastRepository` interface. Domain models contain the seven days, display location, forecast time zone, and successful fetch instant. |
+| Data | `ForecastRepositoryImpl` coordinates `OpenMeteoForecastDataSource` and `ForecastLocalDataSource`. `AndroidLocationAdapter` implements a domain location interface used by `RefreshWeeklyForecastUseCase`. |
 
-Use Hilt for constructor injection and bind interface implementations in the application graph. Scope the repository, HTTP client, and DataStore to the application so callers share one cache and one in-flight refresh.
+Use Hilt for constructor injection and bind interface implementations in the application graph. Scope the refresh use case, repository, HTTP client, and DataStore to the application so callers share one cache and one in-flight refresh.
 
 | Kind | Pattern and planned code | Role |
 | --- | --- | --- |
@@ -35,17 +35,17 @@ Use Hilt for constructor injection and bind interface implementations in the app
 
 Request `ACCESS_COARSE_LOCATION` at first use via the Activity Result API. Coarse location is sufficient for a daily forecast. Keep the permission request in the UI and pass its result to the ViewModel. Recheck current permission at launch and on retry so a Settings change takes effect. Save whether the permission prompt was attempted as a separate preference so process restarts respect a denial.
 
-When granted, request a current fix through the platform location API with a 5-second timeout. Treat a disabled provider, a null fix, or a permission revocation during the request as location unavailable. When unavailable or denied, use the sample coordinates in the assessment (`45.50, -73.57`) as **Montréal (default location)**. Label a device forecast **Device location**. Keep any existing snapshot labeled with the location it was fetched for until a new snapshot is committed.
+When granted, request a current fix in parallel from the enabled platform fused, network, and GPS providers. Use the first available fix within a shared 10-second timeout and cancel the other requests. This lets an emulator GPS fix work even when network location is unavailable. When permission is denied or no provider supplies a fix, use the sample coordinates in the assessment (`45.50, -73.57`) as **Montréal (default location)**. Label a device forecast **Device location**. Keep any existing snapshot labeled with the location it was fetched for until a new snapshot is committed.
 
 ### REST contract
 
-Call Open-Meteo over HTTPS with the resolved coordinates. Request `GET /v1/forecast` with `forecast_days=7`, `timezone=auto`, `temperature_unit=celsius`, and `daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max`. The suggested endpoint needs no API key for this assessment. Add Android's `INTERNET` permission. [Open-Meteo forecast API](https://open-meteo.com/en/docs)
+Use Ktor Client with its Android engine to call Open-Meteo over HTTPS with the resolved coordinates. Request `GET /v1/forecast` with `forecast_days=7`, `timezone=auto`, `temperature_unit=celsius`, and `daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max`. The suggested endpoint needs no API key for this assessment. Add Android's `INTERNET` permission. [Open-Meteo forecast API](https://open-meteo.com/en/docs)
 
 Read `daily.time` as location-local dates and retain the response time zone. Match the arrays by index. Require seven consecutive dates and seven usable weather codes, minima, and maxima. Use the date range returned by Open-Meteo so a request spanning midnight does not depend on the device's time zone or on when it finished. A missing precipitation value leaves that day's precipitation field absent. Surface an unknown numeric weather code as **Unknown conditions**. Treat response errors, incomplete required fields, and invalid dates as refresh failures before writing anything. Inject a clock for the fetch timestamp.
 
 ### Cache and refresh
 
-Use a single typed DataStore record for the latest successful forecast. Store a versioned snapshot containing a location label, a forecast time zone ID, the seven daily entries, and the fetch instant in UTC. A bounded one-record store fits the read and replace access pattern. Exclude this replaceable snapshot from Android backup and device transfer.
+Use a single typed DataStore record for the latest successful forecast. Store a versioned snapshot containing the location identity used for display, a forecast time zone ID, the seven daily entries, and the fetch instant in UTC. A bounded one-record store fits the read and replace access pattern. Exclude this replaceable snapshot from Android backup and device transfer.
 
 1. On initial screen load, start observing the persisted snapshot and display it as soon as it is available, including while a permission request or refresh is in progress.
 2. Resolve the target after the permission outcome is known. Serialize refreshes and coalesce repeat actions while one is running. Use a bounded HTTP call timeout and propagate coroutine cancellation.
