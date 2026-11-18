@@ -1,14 +1,19 @@
 package com.leonardo.valderas.meeklyweather.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -28,33 +33,59 @@ fun ForecastDayCard(day: DailyForecast, locale: Locale) {
     }
     val integerFormat = remember(locale) { NumberFormat.getIntegerInstance(locale) }
     val percentFormat = remember(locale) { NumberFormat.getPercentInstance(locale) }
+    val colors = MaterialTheme.colorScheme
 
-    Surface(
+    OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(1.dp, colors.outlineVariant),
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = colors.surfaceContainerLow,
+            contentColor = colors.onSurface,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(date, style = MaterialTheme.typography.titleMedium)
-            Text(stringResource(day.condition.label), style = MaterialTheme.typography.bodyLarge)
-            Text(
-                text = stringResource(
-                    R.string.forecast_temperature_range,
-                    integerFormat.format(day.minCelsius.roundToInt()),
-                    integerFormat.format(day.maxCelsius.roundToInt()),
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            day.precipitationProbability?.let { probability ->
+            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(date, style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = stringResource(R.string.forecast_precipitation, percentFormat.format(probability / 100.0)),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    text = stringResource(day.condition.label),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.primary,
                 )
+            }
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
+                Surface(
+                    color = colors.tertiaryContainer,
+                    contentColor = colors.onTertiaryContainer,
+                    shape = MaterialTheme.shapes.small,
+                ) {
+                    Text(
+                        text = stringResource(
+                            R.string.forecast_temperature_range,
+                            integerFormat.format(day.minCelsius.roundToInt()),
+                            integerFormat.format(day.maxCelsius.roundToInt()),
+                        ),
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                    )
+                }
+                day.precipitationProbability?.let { probability ->
+                    Text(
+                        text = stringResource(
+                            R.string.forecast_precipitation,
+                            percentFormat.format(probability / 100.0),
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.onSurfaceVariant,
+                    )
+                }
             }
         }
     }
